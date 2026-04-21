@@ -1029,8 +1029,9 @@
       <h2>LLMOps</h2>
       <p class="lead">LLMOps는 LLM 기반 서비스를 배포한 뒤에도 품질, 비용, 안전성을 계속 관리하는 운영 방식입니다.</p>
       <div class="chapter-list">
-        <p>Ops는 Operations, 즉 운영을 뜻합니다.</p>
-        <p>DevOps의 운영 관점을 LLM 기반 기능으로 확장한 개념입니다.</p>
+        <p>핵심 지표: 품질, 근거성, 비용, 지연시간, 안전성을 추적합니다.</p>
+        <p>버전 관리와 배포: 프롬프트도 버전으로 관리하고 canary와 rollback을 준비합니다.</p>
+        <p>자동 평가: Evals 파이프라인으로 새 버전이 좋아졌는지 검증합니다.</p>
       </div>
     </section>
 
@@ -1074,36 +1075,38 @@
 
     <section class="slide" data-part="Part 3 · LLMOps">
       <p class="eyebrow">로그와 운영 지표</p>
-      <h2>나중에 원인을 찾을 수 있게<br>버전과 품질을 함께 봅니다</h2>
+      <h2>나중에 원인을 찾으려면<br>버전과 지표를 함께 남겨야 합니다</h2>
       <div class="grid-2">
         <div class="panel code-panel">
-          <strong>로그 예시</strong>
+          <strong>추적해야 할 버전</strong>
           <div class="code">{
   "model": "model-name",
   "promptVersion": "rag-qa-v3",
   "schemaVersion": "answer-v2",
+  "evalSetVersion": "school-policy-v1",
   "retrievedDocIds": ["doc-17", "doc-22"],
   "latencyMs": 1840,
   "inputTokens": 1220
 }</div>
-          <p class="caption">질문과 답변만 저장하면 왜 틀렸는지 찾기 어렵습니다. 모델, 프롬프트, 스키마, 검색 문서가 함께 남아야 합니다.</p>
+          <p class="caption">질문과 답변만 저장하면 원인을 찾기 어렵습니다. 모델, 프롬프트, 스키마, 평가셋, 검색 문서가 함께 남아야 합니다.</p>
         </div>
         <div class="panel">
-          <strong>운영 지표</strong>
+          <strong>핵심 운영 지표</strong>
           <ul>
-            <li>Quality: 정답률, 사용자 피드백</li>
-            <li>Grounding: 근거 문서에 충실한가</li>
-            <li>Cost/Latency: 비용과 응답 속도</li>
-            <li>Safety: 개인정보, 정책 위반, prompt injection</li>
+            <li>Quality: 정답률, 실패 질문, 사용자 피드백</li>
+            <li>Grounding: 답변이 근거 문서에 충실한가</li>
+            <li>Format: JSON, 출처, 스키마가 깨지지 않는가</li>
+            <li>Cost/Latency: 토큰 비용과 응답 시간이 기준 안에 있는가</li>
+            <li>Safety: 개인정보, 정책 위반, prompt injection에 안전한가</li>
           </ul>
-          <p class="arrow-note">→ 정답률만 보지 않고, 근거성·비용·안전성을 함께 봅니다.</p>
+          <p class="arrow-note">→ LLMOps는 정답률 하나가 아니라 품질·근거성·형식·비용·안전성을 함께 봅니다.</p>
         </div>
       </div>
     </section>
 
     <section class="slide" data-part="Part 3 · LLMOps">
-      <p class="eyebrow">LLMOps Loop</p>
-      <h2>로그를 남기고, 평가하고,<br>조금씩 배포합니다</h2>
+      <p class="eyebrow">버전 관리와 안전한 배포</p>
+      <h2>프롬프트 한 줄도<br>제품 동작 변경입니다</h2>
       <div class="flow" aria-label="LLMOps loop">
         <div class="flow-item">Trace</div>
         <div class="flow-item">Evaluate</div>
@@ -1113,38 +1116,31 @@
         <div class="flow-item">Rollback</div>
         <div class="flow-item">Improve</div>
       </div>
-      <p class="lead">이 루프는 기록하고, 평가하고, 비교하고, 조금씩 배포한 뒤 문제가 생기면 되돌리는 흐름입니다.</p>
+      <p class="lead">새 프롬프트는 평가하고, 이전 버전과 비교하고, 일부 트래픽에 canary로 배포한 뒤 문제가 생기면 바로 rollback할 수 있어야 합니다.</p>
     </section>
 
     <section class="slide" data-part="Part 3 · LLMOps">
       <p class="eyebrow">LLMOps Loop 단계</p>
       <h2>각 단계에서는<br>무엇을 할까요?</h2>
       <div class="metric-grid">
-        <div class="metric"><b>Trace</b><span>요청, 응답, 검색 문서, 모델과 프롬프트 버전을 기록합니다.</span></div>
-        <div class="metric"><b>Evaluate</b><span>정답성, 근거성, 스키마, 안전성을 평가합니다.</span></div>
-        <div class="metric"><b>Compare</b><span>새 버전이 기존 버전보다 나아졌는지 비교합니다.</span></div>
-        <div class="metric"><b>Canary</b><span>전체 배포 전 일부 사용자나 트래픽에 먼저 적용합니다.</span></div>
-        <div class="metric"><b>Monitor</b><span>품질, 비용, 지연시간, 사용자 피드백을 관찰합니다.</span></div>
-        <div class="metric"><b>Rollback</b><span>지표가 나빠지면 이전 버전으로 되돌립니다.</span></div>
-        <div class="metric"><b>Improve</b><span>실패 사례를 평가셋과 프롬프트 개선에 반영합니다.</span></div>
+        <div class="metric"><b>Trace</b><span>요청, 응답, 검색 문서, modelVersion, promptVersion을 기록합니다.</span></div>
+        <div class="metric"><b>Evaluate</b><span>evaluation set으로 정답성, 근거성, 스키마, 안전성을 자동 평가합니다.</span></div>
+        <div class="metric"><b>Compare</b><span>새 모델·프롬프트가 기존 버전보다 좋아졌는지 같은 질문으로 비교합니다.</span></div>
+        <div class="metric"><b>Canary</b><span>전체 배포 전 일부 사용자나 트래픽에 먼저 적용해 위험을 줄입니다.</span></div>
+        <div class="metric"><b>Monitor</b><span>품질, 비용, 지연시간, 사용자 피드백, 안전성 지표를 관찰합니다.</span></div>
+        <div class="metric"><b>Rollback</b><span>지표가 나빠지면 이전 promptVersion, modelVersion, indexVersion으로 되돌립니다.</span></div>
+        <div class="metric"><b>Improve</b><span>실패 사례를 평가셋에 추가하고 프롬프트와 검색 설정을 개선합니다.</span></div>
       </div>
     </section>
 
     <section class="slide" data-part="Part 3 · LLMOps">
       <p class="eyebrow">Evals = Evaluations</p>
-      <h2>자동 평가는<br>LLM 서비스의 테스트 코드입니다</h2>
-      <div class="grid-2">
-        <div class="panel">
-          <strong>Evaluation Set</strong>
-          <p>Evaluation Set은 모델이나 프롬프트를 바꾸기 전에 반복해서 던져볼 질문 묶음입니다.</p>
-          <p>자주 들어오는 정상 질문뿐 아니라, 애매한 자격·날짜·권한 조건처럼 실수하기 쉬운 질문도 함께 넣습니다.</p>
-          <p>문서에 없는 질문, 오래된 문서, 충돌 문서도 포함해야 새 버전이 이전보다 나아졌는지 비교할 수 있습니다.</p>
-        </div>
-        <div class="panel">
-          <strong>Pass Criteria</strong>
-          <p>통과 기준은 결론이 맞는지에서 끝나지 않습니다. 답변이 출처 문서에 기반하는지, 출처와 출력 형식이 깨지지 않는지도 확인합니다.</p>
-          <p>또 개인정보나 prompt injection에 안전한지, 비용과 지연시간이 서비스 기준 안에 들어오는지도 함께 봅니다.</p>
-        </div>
+      <h2>Evals 파이프라인은<br>배포 전 품질 게이트입니다</h2>
+      <div class="metric-grid">
+        <div class="metric"><b>1. 평가셋 준비</b><span>정상 질문, 경계 조건, 문서에 없는 질문, 충돌 문서를 모아 같은 질문 세트를 만듭니다.</span></div>
+        <div class="metric"><b>2. 후보 실행</b><span>새 모델, 새 프롬프트, 새 RAG 인덱스로 같은 질문을 실행해 답변을 생성합니다.</span></div>
+        <div class="metric"><b>3. 자동 채점</b><span>정답성, 근거성, 출처, 스키마, 안전성, 비용과 지연시간을 기준으로 평가합니다.</span></div>
+        <div class="metric"><b>4. 배포 판단</b><span>기준을 넘으면 canary로 배포하고, 실패하면 배포를 막고 실패 사례를 평가셋에 추가합니다.</span></div>
       </div>
     </section>
 
