@@ -1,11 +1,12 @@
-# AX Web Fullstack Lecture Demo
+# Sparta 데모 강의
 
-AX 웹 풀스택 엔지니어 강사 대면 인터뷰용 20분 강의 시연 자료입니다.
+AX 웹 풀스택 엔지니어 강사 대면 인터뷰용 20분 데모 강의 자료입니다.
 
 ## Live Demo
 
 - Vercel: https://ax-fullstack-lecture-demo.vercel.app
 - GitHub: https://github.com/jake920220/ax-engineering-lecture-demo
+- HTML Title: `Sparta 데모 강의`
 - Presentation: `presentation.html`
 - Speaker Script: `presentation-script.md`
 
