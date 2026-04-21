@@ -186,6 +186,51 @@
       overflow-wrap: break-word;
     }
 
+    .prompt-example {
+      margin-top: 14px;
+      border: 1px solid rgba(15, 118, 110, 0.24);
+      border-radius: 8px;
+      background: #f5fbf9;
+      color: var(--teal) !important;
+      padding: 12px 14px;
+      font-size: clamp(15px, 1.05vw, 18px) !important;
+      line-height: 1.35 !important;
+      font-weight: 900;
+    }
+
+    .arrow-note {
+      margin-top: 14px;
+      color: var(--teal) !important;
+      font-weight: 900;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .caption {
+      font-size: clamp(16px, 1.22vw, 20px);
+      line-height: 1.42;
+      color: #34414a;
+      font-weight: 800;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .mini-code {
+      margin-top: 14px;
+      background: var(--code);
+      color: var(--codeText);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: "Cascadia Code", "D2Coding", Consolas, monospace;
+      font-size: clamp(14px, 1.05vw, 17px);
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
     ul {
       margin: 0;
       padding-left: 1.1em;
@@ -694,7 +739,11 @@
     <section class="slide chapter" data-part="Part 1 · AI Literacy">
       <p class="eyebrow">PART 1</p>
       <h2>AI Literacy</h2>
-      <p class="lead">AI Literacy는 AI를 읽고, 이해하고, 적절히 활용하는 능력입니다. 여기서는 LLM이 정답 DB가 아니라 생성 모델이라는 점과, 대표적인 프롬프팅 기법을 먼저 정리합니다.</p>
+      <p class="lead">AI Literacy는 AI를 읽고, 이해하고, 적절히 활용하는 능력입니다.</p>
+      <div class="chapter-list">
+        <p>LLM이란</p>
+        <p>자주 사용되었던 프롬프팅 기법</p>
+      </div>
     </section>
 
     <section class="slide" data-part="Part 1 · AI Literacy">
@@ -723,28 +772,31 @@
         <div class="panel">
           <strong>Zero-shot</strong>
           <p>예시 없이 지시만 제공합니다. "다음 글을 세 줄로 요약해줘"처럼 바로 요청하는 방식입니다.</p>
+          <p class="prompt-example">예: "이 공지를 세 줄로 요약해줘."</p>
         </div>
         <div class="panel">
           <strong>Few-shot</strong>
           <p>입력과 출력 예시를 몇 개 보여줍니다. 분류 라벨이나 출력 형식을 맞출 때 유용합니다.</p>
+          <p class="prompt-example">예: "A → 학사, B → 장학 형식처럼 다음 질문도 분류해줘."</p>
         </div>
         <div class="panel">
           <strong>CoT</strong>
           <p>Chain of Thought, 즉 단계적으로 생각하도록 유도하는 방식입니다. 과거 복잡한 추론 태스크에서 자주 사용됐습니다.</p>
+          <p class="prompt-example">예전 예: "단계별로 생각해서 이유를 설명해줘."</p>
         </div>
       </div>
     </section>
 
     <section class="slide" data-part="Part 1 · AI Literacy">
       <p class="eyebrow">프롬프팅 업데이트</p>
-      <h2>요즘은 CoT를 습관적으로<br>요구하지 않습니다</h2>
+      <h2>요즘은 CoT 사용이 권장되지 않고,<br>few-shot도 필요한 경우에만!</h2>
       <div class="compare">
         <div class="panel bad">
-          <strong>예전 습관</strong>
+          <strong>예전 프롬프팅</strong>
           <ul>
             <li>복잡하면 few-shot 예시를 계속 추가합니다.</li>
             <li>어려우면 "think step by step"을 붙입니다.</li>
-            <li>긴 사고 과정을 출력하게 합니다.</li>
+            <li>이러한 방식은 긴 사고 과정을 출력하게 합니다.</li>
           </ul>
         </div>
         <div class="panel good">
@@ -752,7 +804,7 @@
           <ul>
             <li>먼저 zero-shot으로 간결하게 시도합니다.</li>
             <li>필요할 때만 few-shot을 추가합니다.</li>
-            <li>사고 과정보다 목표, 제약, 출력 형식을 명확히 줍니다.</li>
+            <li>사고 과정보다 목표, 제약, 출력 형식을 중요시합니다.</li>
           </ul>
         </div>
       </div>
@@ -766,12 +818,12 @@
         <div class="panel bad">
           <strong>애매한 요청</strong>
           <p>"학교 규정에 대해 친절하고 정확하게 답해줘."</p>
-          <p>무엇을 근거로 할지, 모르면 어떻게 할지, 어떤 형식으로 답할지 알 수 없습니다.</p>
+          <p class="arrow-note">→ 무엇을 근거로 할지, 모르면 어떻게 할지, 어떤 형식으로 답할지 알 수 없습니다.</p>
         </div>
         <div class="panel good">
-          <strong>서비스용 요청</strong>
+          <strong>좋은 요청</strong>
           <p>"제공된 문서만 근거로 답하고, 근거가 없으면 확인 불가라고 말해줘. 답변에는 출처 docId를 포함해줘."</p>
-          <p>역할, 제약, 출력 형식을 명확히 줍니다.</p>
+          <p class="arrow-note">→ 역할, 제약, 출력 형식을 명확히 줍니다.</p>
         </div>
       </div>
     </section>
@@ -781,8 +833,7 @@
       <h2>RAG <span class="h2-sub">(Retrieval-Augmented Generation)</span></h2>
       <p class="lead">RAG는 모델이 기억만으로 답하지 않도록, 질문 시점에 관련 문서를 찾아 근거로 넣는 구조입니다.</p>
       <div class="chapter-list">
-        <p>비유하면 closed-book 시험에서 open-book 시험으로 바꾸는 일입니다.</p>
-        <p>문서 준비, 검색, 리랭킹, 프롬프트 반영, 주의점이 하나의 파이프라인으로 연결됩니다.</p>
+        <p>비유하면 시험에서 참고 자료를 볼 수 있게 바꾸는 일입니다.</p>
       </div>
     </section>
 
@@ -820,7 +871,7 @@
           <p>모델이 근거를 바탕으로 답변과 출처를 생성합니다.</p>
         </div>
       </div>
-      <p class="lead">중요한 점은 "모델이 아는 척"하지 않고 "자료를 보고 답하게" 만드는 것입니다.</p>
+      <p class="lead">핵심은 "아는 척"이 아니라 "자료를 보고 답하게" 만드는 것입니다.</p>
     </section>
 
     <section class="slide" data-part="Part 2 · RAG">
@@ -835,7 +886,7 @@
         <div class="flow-item">프롬프트 반영</div>
         <div class="flow-item">답변·출처</div>
       </div>
-      <p class="lead">각 단계가 흔들리면 최종 답변도 흔들립니다.</p>
+      <p class="lead">RAG는 벡터 DB 하나를 붙이는 작업이 아닙니다. 보시는 것처럼 문서 준비부터 답변·출처까지 이어지는 흐름입니다.</p>
     </section>
 
     <section class="slide" data-part="Part 2 · RAG">
@@ -855,19 +906,19 @@
 
     <section class="slide" data-part="Part 2 · RAG">
       <p class="eyebrow">검색 준비와 검색</p>
-      <h2>문서 조각을 의미 좌표로 저장하고<br>질문과 가까운 조각을 찾습니다</h2>
+      <h2>먼저 의미로 찾고,<br>조건으로 좁혀 정확도를 높입니다</h2>
       <div class="grid-3">
         <div class="panel">
           <strong>Embedding</strong>
-          <p>텍스트를 숫자 벡터로 바꿔 의미적으로 가까운 문장을 찾게 합니다.</p>
+          <p>문서 조각을 숫자 벡터로 바꿔 의미적으로 가까운 문장을 찾게 합니다.</p>
         </div>
         <div class="panel">
           <strong>Hybrid Search</strong>
-          <p>의미 검색은 개념에 강하고, 키워드 검색은 정책 번호와 고유명사에 강합니다.</p>
+          <p>벡터 검색은 의미에 강하고, 키워드 검색은 규정 번호와 고유명사에 강합니다. 둘을 함께 써 후보를 넓게 잡습니다.</p>
         </div>
         <div class="panel">
           <strong>Metadata Filter</strong>
-          <p>학기, 부서, 날짜, 권한 같은 조건으로 후보 문서를 줄입니다.</p>
+          <p>그 다음 학기, 부서, 날짜, 권한 같은 조건으로 지금 답해도 되는 문서만 남깁니다.</p>
         </div>
       </div>
     </section>
@@ -881,7 +932,10 @@
           <p>처음 검색된 후보 중 질문에 정말 답이 되는 문서를 위로 올립니다.</p>
           <p>문서가 많아질수록 RAG 정확도를 좌우하는 핵심 장치입니다.</p>
         </div>
-        <div class="code">아래 context의 근거만 사용하세요.
+        <div class="panel">
+          <strong>프롬프트 반영</strong>
+          <p>상위 문서만 넣는 것이 아니라, 답변 정책까지 함께 전달합니다.</p>
+          <div class="mini-code">아래 context의 근거만 사용하세요.
 근거가 부족하면 "확인 불가"라고 답하세요.
 답변 끝에 사용한 docId를 표시하세요.
 
@@ -889,6 +943,7 @@
 [doc-17] ...
 [doc-22] ...
 </context></div>
+        </div>
       </div>
     </section>
 
@@ -904,8 +959,7 @@
 휴학생은 정규학기 수강 신청 대상이 아니다.</div>
         <div class="panel">
           <strong>좋은 답변</strong>
-          <p>가능할 수 있습니다. 다만 "휴학생 전체"가 아니라 "복학 예정자"라는 조건이 있습니다.</p>
-          <p>좋은 RAG 답변은 결론, 조건, 출처를 함께 보존합니다. [doc-17]</p>
+          <p>가능할 수 있습니다. 다만 "휴학생 전체"가 아니라 "복학 예정자"라는 조건이 있습니다. 출처 [doc-17]</p>
         </div>
       </div>
     </section>
@@ -938,25 +992,26 @@
       <h2>LLMOps</h2>
       <p class="lead">LLMOps는 LLM 기반 서비스를 배포한 뒤에도 품질, 비용, 안전성을 계속 관리하는 운영 방식입니다.</p>
       <div class="chapter-list">
-        <p>DevOps가 "만든 서비스를 잘 굴러가게 하는 일"이라면, LLMOps는 그 대상을 AI 기능으로 확장한 것입니다.</p>
+        <p>Ops는 Operations, 즉 운영을 뜻합니다.</p>
+        <p>DevOps의 운영 관점을 LLM 기반 기능으로 확장한 개념입니다.</p>
       </div>
     </section>
 
     <section class="slide" data-part="Part 3 · LLMOps">
       <p class="eyebrow">Ops와 LLM 기반 서비스</p>
-      <h2>단순 챗봇만<br>LLM 서비스가 아닙니다</h2>
+      <h2>LLM이 들어가면 서비스의<br>품질 기준도 바뀝니다</h2>
       <div class="grid-3">
         <div class="panel">
-          <strong>Ops</strong>
-          <p>배포, 모니터링, 장애 대응, 비용 관리, 롤백처럼 "잘 굴러가게 하는 일"입니다.</p>
+          <strong>답변형 서비스</strong>
+          <p>챗봇, FAQ, 학사 규정 안내처럼 사용자 질문에 답합니다. 핵심은 정답성과 출처입니다.</p>
         </div>
         <div class="panel">
-          <strong>LLM 서비스</strong>
-          <p>챗봇, 사내 문서 검색, 코드/문서 Copilot, 데이터 분석 보조를 포함합니다.</p>
+          <strong>업무 보조 서비스</strong>
+          <p>문서 요약, 코드 생성, 데이터 분석 보조처럼 결과물이 실제 업무에 사용됩니다.</p>
         </div>
         <div class="panel">
           <strong>Agent Workflow</strong>
-          <p>검색, 도구 호출, 예약, 승인 요청처럼 여러 단계를 수행하는 AI 흐름도 포함됩니다.</p>
+          <p>검색, 도구 호출, 예약, 승인 요청처럼 여러 단계를 수행하므로 권한과 실패 처리가 중요합니다.</p>
         </div>
       </div>
     </section>
@@ -966,16 +1021,16 @@
       <h2>LLM 서비스는 200 OK여도<br>틀린 답변일 수 있습니다</h2>
       <div class="grid-3">
         <div class="panel">
-          <strong>일반 API</strong>
-          <p>응답 성공, 상태 코드, latency만 봐도 많은 문제를 발견할 수 있습니다.</p>
+          <strong>성공처럼 보임</strong>
+          <p>HTTP 200, 빠른 응답, 자연스러운 문장만 보면 정상처럼 보일 수 있습니다.</p>
         </div>
         <div class="panel">
-          <strong>LLM API</strong>
-          <p>호출은 성공했지만 답변이 틀리거나, 출처가 엉뚱하거나, JSON 형식이 깨질 수 있습니다.</p>
+          <strong>실제 문제</strong>
+          <p>답변이 틀리거나, 출처가 엉뚱하거나, JSON 형식이 깨지거나, 민감정보가 섞일 수 있습니다.</p>
         </div>
         <div class="panel">
-          <strong>복합 버전</strong>
-          <p>모델, 프롬프트, 스키마, 검색 인덱스가 함께 바뀌므로 추적이 필요합니다.</p>
+          <strong>운영 질문</strong>
+          <p>어느 모델, 어느 프롬프트, 어느 문서 인덱스에서 문제가 생겼는지 추적해야 합니다.</p>
         </div>
       </div>
     </section>
@@ -984,7 +1039,8 @@
       <p class="eyebrow">로그와 운영 지표</p>
       <h2>나중에 원인을 찾을 수 있게<br>버전과 품질을 함께 봅니다</h2>
       <div class="grid-2">
-        <div class="code">{
+        <div class="stack">
+          <div class="code">{
   "model": "model-name",
   "promptVersion": "rag-qa-v3",
   "schemaVersion": "answer-v2",
@@ -992,6 +1048,8 @@
   "latencyMs": 1840,
   "inputTokens": 1220
 }</div>
+          <p class="caption">질문과 답변만 저장하면 왜 틀렸는지 찾기 어렵습니다. 모델, 프롬프트, 스키마, 검색 문서가 함께 남아야 합니다.</p>
+        </div>
         <div class="panel">
           <strong>운영 지표</strong>
           <ul>
@@ -1000,6 +1058,7 @@
             <li>Cost/Latency: 비용과 응답 속도</li>
             <li>Safety: 개인정보, 정책 위반, prompt injection</li>
           </ul>
+          <p class="arrow-note">→ 정답률만 보지 않고, 근거성·비용·안전성을 함께 봅니다.</p>
         </div>
       </div>
     </section>
@@ -1016,7 +1075,7 @@
         <div class="flow-item">Rollback</div>
         <div class="flow-item">Improve</div>
       </div>
-      <p class="lead">프롬프트 한 줄 변경도 사용자 입장에서는 제품 동작 변경입니다.</p>
+      <p class="lead">이 루프는 기록하고, 평가하고, 비교하고, 조금씩 배포한 뒤 문제가 생기면 되돌리는 흐름입니다.</p>
     </section>
 
     <section class="slide" data-part="Part 3 · LLMOps">
@@ -1034,17 +1093,18 @@
     </section>
 
     <section class="slide" data-part="Part 3 · LLMOps">
-      <p class="eyebrow">Evals</p>
+      <p class="eyebrow">Evals = Evaluations</p>
       <h2>자동 평가는<br>LLM 서비스의 테스트 코드입니다</h2>
       <div class="grid-2">
         <div class="panel">
-          <strong>평가 케이스</strong>
-          <p>정답이 있는 질문뿐 아니라, 문서에 없는 질문과 오래된 문서가 섞인 질문도 포함합니다.</p>
+          <strong>Evaluation Set</strong>
+          <p>새 모델이나 프롬프트를 적용하기 전에 같은 질문 세트로 자동 평가합니다.</p>
+          <p>정답이 있는 질문, 문서에 없는 질문, 오래된 문서가 섞인 질문을 함께 넣습니다.</p>
         </div>
         <div class="panel">
-          <strong>통과 기준</strong>
-          <p>정답, 출처, 불확실성, 스키마, 비용, 지연시간을 함께 확인합니다.</p>
-          <p>모를 때 모른다고 말하는지도 평가해야 합니다.</p>
+          <strong>Pass Criteria</strong>
+          <p>정답성, 근거성, 출처, 불확실성, 스키마, 안전성, 비용과 지연시간을 함께 확인합니다.</p>
+          <p>특히 모를 때 모른다고 말하는지를 봅니다.</p>
         </div>
       </div>
     </section>
