@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>신뢰할 수 있는 AI 서비스 설계</title>
+  <style>
+    :root {
+      --paper: #fbfaf6;
+      --ink: #172026;
+      --muted: #647078;
+      --line: #d8d2c4;
+      --teal: #0f766e;
+      --coral: #d95f43;
+      --mustard: #b7791f;
+      --blue: #2563eb;
+      --green: #3f7d20;
+      --panel: #ffffff;
+      --code: #1f2933;
+      --codeText: #eef3f6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+      overflow: hidden;
+      word-break: keep-all;
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+      width: 100vw;
+      height: 100vh;
+      padding: 5vh 6vw;
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(15, 118, 110, 0.08) 0 1px, transparent 1px 100%),
+        linear-gradient(0deg, rgba(15, 118, 110, 0.07) 0 1px, transparent 1px 100%),
+        var(--paper);
+      background-size: 44px 44px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(32px) scale(0.985);
+      transition:
+        opacity 360ms ease,
+        transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 360ms ease;
+      visibility: hidden;
+      z-index: 0;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0) scale(1);
+      visibility: visible;
+      z-index: 2;
+    }
+
+    .deck[data-direction="prev"] .slide {
+      transform: translateX(-32px) scale(0.985);
+    }
+
+    .deck[data-direction="prev"] .slide.active {
+      transform: translateX(0) scale(1);
+    }
+
+    .eyebrow {
+      color: var(--teal);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin: 0 0 4px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    h1 {
+      font-size: clamp(48px, 6.2vw, 88px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      max-width: 1120px;
+      text-wrap: balance;
+    }
+
+    h2 {
+      font-size: clamp(38px, 4.7vw, 68px);
+      line-height: 1.08;
+      letter-spacing: 0;
+      max-width: 1120px;
+      text-wrap: balance;
+    }
+
+    h3 {
+      font-size: clamp(22px, 2.2vw, 32px);
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      font-size: clamp(24px, 2.4vw, 38px);
+      line-height: 1.38;
+      color: #2d3840;
+      max-width: 1080px;
+    }
+
+    .small {
+      font-size: clamp(17px, 1.35vw, 22px);
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--coral);
+    }
+
+    .rule {
+      width: 100%;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .grid-3,
+    .grid-2 {
+      display: grid;
+      gap: 22px;
+      width: 100%;
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      min-height: 170px;
+      box-shadow: 0 12px 30px rgba(23, 32, 38, 0.06);
+    }
+
+    .panel strong {
+      display: block;
+      font-size: clamp(22px, 2vw, 30px);
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+
+    .panel p,
+    .panel li {
+      font-size: clamp(18px, 1.55vw, 24px);
+      line-height: 1.42;
+      color: #34414a;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.1em;
+    }
+
+    li + li {
+      margin-top: 10px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .tag {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #26313a;
+      padding: 10px 14px;
+      font-weight: 800;
+      font-size: clamp(17px, 1.3vw, 22px);
+      white-space: nowrap;
+    }
+
+    .part-indicator {
+      position: absolute;
+      top: 3.2vh;
+      right: 6vw;
+      z-index: 10;
+      border: 1px solid rgba(15, 118, 110, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--teal);
+      padding: 10px 14px;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: 0 10px 24px rgba(23, 32, 38, 0.06);
+      backdrop-filter: blur(8px);
+      max-width: min(420px, 44vw);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tag.teal {
+      border-color: rgba(15, 118, 110, 0.35);
+      color: var(--teal);
+    }
+
+    .tag.coral {
+      border-color: rgba(217, 95, 67, 0.4);
+      color: var(--coral);
+    }
+
+    .tag.mustard {
+      border-color: rgba(183, 121, 31, 0.4);
+      color: var(--mustard);
+    }
+
+    .part-list {
+      display: grid;
+      gap: 12px;
+      max-width: 720px;
+      font-size: clamp(22px, 2.1vw, 34px);
+      line-height: 1.28;
+      color: #26313a;
+      font-weight: 900;
+    }
+
+    .part-line {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 18px;
+      align-items: baseline;
+    }
+
+    .part-line span:first-child {
+      color: var(--teal);
+      font-size: 0.82em;
+      text-transform: uppercase;
+    }
+
+    .fullscreen-button {
+      position: absolute;
+      right: 6vw;
+      bottom: 7.2vh;
+      z-index: 12;
+      border: 1px solid rgba(15, 118, 110, 0.28);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--teal);
+      width: 42px;
+      height: 42px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      font: inherit;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(23, 32, 38, 0.06);
+      backdrop-filter: blur(8px);
+    }
+
+    .fullscreen-button:hover,
+    .fullscreen-button:focus-visible {
+      border-color: var(--teal);
+      outline: none;
+    }
+
+    .fullscreen-button svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .page-counter {
+      position: absolute;
+      left: 50%;
+      bottom: 3.2vh;
+      transform: translateX(-50%);
+      z-index: 11;
+      border: 1px solid rgba(15, 118, 110, 0.22);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      color: #34414a;
+      padding: 9px 14px;
+      min-width: 72px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: 0 10px 24px rgba(23, 32, 38, 0.05);
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+
+    .chapter h2 {
+      font-size: clamp(56px, 7.4vw, 108px);
+      line-height: 0.98;
+      max-width: 1160px;
+    }
+
+    .chapter h2 .h2-sub {
+      display: block;
+      font-size: 0.38em;
+      line-height: 1.22;
+      margin-top: 12px;
+    }
+
+    .chapter .lead {
+      max-width: 980px;
+    }
+
+    .chapter-list {
+      display: grid;
+      gap: 10px;
+      max-width: 920px;
+    }
+
+    .chapter-list p {
+      font-size: clamp(22px, 2vw, 32px);
+      line-height: 1.35;
+      color: #34414a;
+      font-weight: 800;
+    }
+
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      border: 1px solid rgba(15, 118, 110, 0.28);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--teal);
+      padding: 12px 16px;
+      font-size: clamp(16px, 1.2vw, 20px);
+      font-weight: 900;
+      line-height: 1.25;
+      text-decoration: none;
+      box-shadow: 0 10px 24px rgba(23, 32, 38, 0.05);
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .source-link:hover,
+    .source-link:focus-visible {
+      border-color: var(--teal);
+      outline: none;
+      text-decoration: underline;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .flow-item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 126px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: clamp(17px, 1.35vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      position: relative;
+      word-break: keep-all;
+    }
+
+    .flow-item:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -17px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--coral);
+      font-size: 28px;
+      z-index: 1;
+    }
+
+    .code {
+      background: var(--code);
+      color: var(--codeText);
+      border-radius: 8px;
+      padding: 22px;
+      font-family: "Cascadia Code", "D2Coding", Consolas, monospace;
+      font-size: clamp(16px, 1.35vw, 22px);
+      line-height: 1.48;
+      white-space: pre-wrap;
+      overflow: hidden;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .bad {
+      border-top: 8px solid var(--coral);
+    }
+
+    .good {
+      border-top: 8px solid var(--teal);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      width: 100%;
+    }
+
+    .metric {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 132px;
+    }
+
+    .metric b {
+      display: block;
+      color: var(--teal);
+      font-size: clamp(18px, 1.45vw, 24px);
+      margin-bottom: 8px;
+    }
+
+    .metric span {
+      color: #34414a;
+      font-size: clamp(15px, 1.15vw, 19px);
+      line-height: 1.35;
+      word-break: keep-all;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 132px;
+    }
+
+    .step b {
+      display: block;
+      color: var(--coral);
+      font-size: clamp(18px, 1.4vw, 22px);
+      margin-bottom: 10px;
+    }
+
+    .step span {
+      font-size: clamp(15px, 1.12vw, 18px);
+      line-height: 1.35;
+      color: #34414a;
+      word-break: keep-all;
+    }
+
+    .quote {
+      border-left: 8px solid var(--teal);
+      padding: 18px 0 18px 24px;
+      max-width: 1050px;
+      font-size: clamp(28px, 3vw, 46px);
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .footer {
+      position: absolute;
+      left: 6vw;
+      right: 6vw;
+      bottom: 3.2vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #6a746f;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 5px;
+      width: 100%;
+      background: rgba(15, 118, 110, 0.12);
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--teal);
+      transition: width 180ms ease;
+    }
+
+    .notes {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .deck {
+        height: auto;
+      }
+
+      .slide,
+      .slide.active {
+        position: relative;
+        display: flex;
+        min-height: 100vh;
+        height: auto;
+        padding: 48px 26px 72px;
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+        transition: none;
+        visibility: visible;
+      }
+
+      .grid-3,
+      .grid-2,
+      .compare,
+      .metric-grid,
+      .timeline {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-item:not(:last-child)::after {
+        content: "↓";
+        right: auto;
+        left: 50%;
+        top: auto;
+        bottom: -25px;
+        transform: translateX(-50%);
+      }
+
+      .footer,
+      .part-indicator,
+      .fullscreen-button,
+      .page-counter,
+      .progress {
+        display: none;
+      }
+    }
+
+    @media print {
+      body {
+        overflow: visible;
+        background: #fff;
+      }
+
+      .slide {
+        display: flex !important;
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+        page-break-after: always;
+      }
+
+      .progress {
+        display: none;
+      }
+
+      .part-indicator {
+        display: none;
+      }
+
+      .fullscreen-button {
+        display: none;
+      }
+
+      .page-counter {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" data-direction="next" aria-live="polite">
+    <section class="slide active" data-part="Intro">
+      <p class="eyebrow">Fullstack AX Agent Engineering</p>
+      <h1>신뢰할 수 있는 AI 서비스를 설계합니다</h1>
+      <p class="lead">오늘의 핵심은 단순합니다. AI가 자연스럽게 말하는 것과, 사용자가 믿고 행동할 수 있는 답변을 만드는 것은 다릅니다.</p>
+      <div class="part-list" aria-label="강의 구성">
+        <div class="part-line"><span>Part 1</span><strong>AI Literacy</strong></div>
+        <div class="part-line"><span>Part 2</span><strong>RAG</strong></div>
+        <div class="part-line"><span>Part 3</span><strong>LLMOps</strong></div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Intro">
+      <p class="eyebrow">오늘의 문제 상황</p>
+      <h2>AI 조교가 학사 규정을<br>진짜처럼 틀리게 답한다면?</h2>
+      <div class="grid-2">
+        <div class="panel bad">
+          <strong>학생의 질문</strong>
+          <p>"휴학생도 계절학기 신청할 수 있나요?"</p>
+          <p>AI가 자신 있게 "네, 가능합니다"라고 답했지만, 실제 규정은 "복학 예정자만 가능"이라면 문제가 됩니다.</p>
+        </div>
+        <div class="panel good">
+          <strong>개발자의 과제</strong>
+          <p>답변을 생성하는 것만으로는 부족합니다.</p>
+          <p>근거 문서, 출처 표시, 품질 평가, 배포 후 모니터링까지 함께 설계해야 합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Intro">
+      <p class="eyebrow">오늘의 지도</p>
+      <h2>AI 앱이 흔들리는 세 지점을<br>차례대로 잡아봅니다</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>1. Prompting</strong>
+          <p>모델에게 어떤 일을, 어떤 기준으로, 어떤 형식으로 시킬지 정합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>2. RAG</strong>
+          <p>모델이 모르는 최신 정보와 내부 문서를 검색해서 근거로 연결합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>3. LLMOps</strong>
+          <p>배포 이후에도 품질, 비용, 안전성을 계속 확인하고 개선합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide chapter" data-part="Part 1 · AI Literacy">
+      <p class="eyebrow">PART 1</p>
+      <h2>AI Literacy</h2>
+      <p class="lead">AI Literacy는 AI를 읽고, 이해하고, 적절히 활용하는 능력입니다. 여기서는 LLM이 정답 DB가 아니라 생성 모델이라는 점과, 대표적인 프롬프팅 기법을 먼저 정리합니다.</p>
+    </section>
+
+    <section class="slide" data-part="Part 1 · AI Literacy">
+      <p class="eyebrow">LLM 기본 이해</p>
+      <h2>LLM은 정답 DB가 아니라<br>문맥 기반 생성 모델입니다</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>잘하는 일</strong>
+          <p>문맥을 읽고 자연스러운 문장을 생성합니다. 요약, 분류, 초안 작성에 강합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>조심할 일</strong>
+          <p>자연스럽게 말해도 사실이 아닐 수 있습니다. 최신 정보와 내부 문서는 기본적으로 모릅니다.</p>
+        </div>
+        <div class="panel">
+          <strong>서비스 관점</strong>
+          <p>AI 답변이 사용자의 행동으로 이어지면, 근거와 검증 장치가 필요합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 1 · AI Literacy">
+      <p class="eyebrow">대표 프롬프팅 기법</p>
+      <h2>Zero-shot, Few-shot, CoT는<br>무엇일까요?</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>Zero-shot</strong>
+          <p>예시 없이 지시만 제공합니다. "다음 글을 세 줄로 요약해줘"처럼 바로 요청하는 방식입니다.</p>
+        </div>
+        <div class="panel">
+          <strong>Few-shot</strong>
+          <p>입력과 출력 예시를 몇 개 보여줍니다. 분류 라벨이나 출력 형식을 맞출 때 유용합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>CoT</strong>
+          <p>Chain of Thought, 즉 단계적으로 생각하도록 유도하는 방식입니다. 과거 복잡한 추론 태스크에서 자주 사용됐습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 1 · AI Literacy">
+      <p class="eyebrow">프롬프팅 업데이트</p>
+      <h2>요즘은 CoT를 습관적으로<br>요구하지 않습니다</h2>
+      <div class="compare">
+        <div class="panel bad">
+          <strong>예전 습관</strong>
+          <ul>
+            <li>복잡하면 few-shot 예시를 계속 추가합니다.</li>
+            <li>어려우면 "think step by step"을 붙입니다.</li>
+            <li>긴 사고 과정을 출력하게 합니다.</li>
+          </ul>
+        </div>
+        <div class="panel good">
+          <strong>최근 권장 흐름</strong>
+          <ul>
+            <li>먼저 zero-shot으로 간결하게 시도합니다.</li>
+            <li>필요할 때만 few-shot을 추가합니다.</li>
+            <li>사고 과정보다 목표, 제약, 출력 형식을 명확히 줍니다.</li>
+          </ul>
+        </div>
+      </div>
+      <a class="source-link" href="https://developers.openai.com/api/docs/guides/reasoning-best-practices" target="_blank" rel="noreferrer">공식 문서: OpenAI Reasoning best practices (CoT 프롬프트 회피, zero-shot 우선)</a>
+    </section>
+
+    <section class="slide" data-part="Part 1 · AI Literacy">
+      <p class="eyebrow">프롬프트 설계</p>
+      <h2>좋은 프롬프트는<br>성공 방식과 실패 방식을 함께 정합니다</h2>
+      <div class="grid-2">
+        <div class="panel bad">
+          <strong>애매한 요청</strong>
+          <p>"학교 규정에 대해 친절하고 정확하게 답해줘."</p>
+          <p>무엇을 근거로 할지, 모르면 어떻게 할지, 어떤 형식으로 답할지 알 수 없습니다.</p>
+        </div>
+        <div class="panel good">
+          <strong>서비스용 요청</strong>
+          <p>"제공된 문서만 근거로 답하고, 근거가 없으면 확인 불가라고 말해줘. 답변에는 출처 docId를 포함해줘."</p>
+          <p>역할, 제약, 출력 형식을 명확히 줍니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide chapter" data-part="Part 2 · RAG">
+      <p class="eyebrow">PART 2</p>
+      <h2>RAG <span class="h2-sub">(Retrieval-Augmented Generation)</span></h2>
+      <p class="lead">RAG는 모델이 기억만으로 답하지 않도록, 질문 시점에 관련 문서를 찾아 근거로 넣는 구조입니다.</p>
+      <div class="chapter-list">
+        <p>비유하면 closed-book 시험에서 open-book 시험으로 바꾸는 일입니다.</p>
+        <p>문서 준비, 검색, 리랭킹, 프롬프트 반영, 주의점이 하나의 파이프라인으로 연결됩니다.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">RAG가 생긴 이유</p>
+      <h2>어제 바뀐 공지를<br>모델이 알 수 있을까요?</h2>
+      <div class="grid-2">
+        <div class="panel bad">
+          <strong>모델 기억만 사용</strong>
+          <p>모델은 학습한 내용과 입력 프롬프트 안에서 답합니다.</p>
+          <p>최신 공지, 사내 문서, 학교 규정처럼 계속 바뀌는 정보에 약합니다.</p>
+        </div>
+        <div class="panel good">
+          <strong>RAG 사용</strong>
+          <p>질문 시점에 관련 문서를 검색해서 답변 근거로 넣습니다.</p>
+          <p>모델을 다시 학습시키지 않아도 지식 업데이트가 가능합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">RAG의 핵심 아이디어</p>
+      <h2>Retrieve → Augment → Generate</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>Retrieve</strong>
+          <p>사용자 질문과 관련된 문서 조각을 찾습니다.</p>
+        </div>
+        <div class="panel">
+          <strong>Augment</strong>
+          <p>찾은 문서를 프롬프트의 근거로 추가합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>Generate</strong>
+          <p>모델이 근거를 바탕으로 답변과 출처를 생성합니다.</p>
+        </div>
+      </div>
+      <p class="lead">중요한 점은 "모델이 아는 척"하지 않고 "자료를 보고 답하게" 만드는 것입니다.</p>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">RAG Pipeline</p>
+      <h2>문서를 찾아 답변에 넣는<br>전체 흐름입니다</h2>
+      <div class="flow" aria-label="RAG pipeline">
+        <div class="flow-item">문서 수집</div>
+        <div class="flow-item">청킹</div>
+        <div class="flow-item">임베딩·인덱싱</div>
+        <div class="flow-item">문서 조각 검색</div>
+        <div class="flow-item">리랭킹</div>
+        <div class="flow-item">프롬프트 반영</div>
+        <div class="flow-item">답변·출처</div>
+      </div>
+      <p class="lead">각 단계가 흔들리면 최종 답변도 흔들립니다.</p>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">문서 준비: 수집과 청킹</p>
+      <h2>AI가 참고할 자료실을 만들고<br>검색 가능한 조각으로 나눕니다</h2>
+      <div class="grid-2">
+        <div class="panel">
+          <strong>문서 수집</strong>
+          <p>PDF, 웹페이지, Notion, DB, FAQ를 가져옵니다. 중복, 오래된 문서, 권한 없는 문서는 걸러야 합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>청킹</strong>
+          <p>문서를 제목, 문단, 표, 조항 단위로 나눕니다. 너무 작으면 맥락이 사라지고, 너무 크면 잡음이 섞입니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">검색 준비와 검색</p>
+      <h2>문서 조각을 의미 좌표로 저장하고<br>질문과 가까운 조각을 찾습니다</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>Embedding</strong>
+          <p>텍스트를 숫자 벡터로 바꿔 의미적으로 가까운 문장을 찾게 합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>Hybrid Search</strong>
+          <p>의미 검색은 개념에 강하고, 키워드 검색은 정책 번호와 고유명사에 강합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>Metadata Filter</strong>
+          <p>학기, 부서, 날짜, 권한 같은 조건으로 후보 문서를 줄입니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">리랭킹과 프롬프트 반영</p>
+      <h2>찾은 문서를 다시 줄 세우고<br>답변 정책과 함께 넣습니다</h2>
+      <div class="grid-2">
+        <div class="panel">
+          <strong>Reranking</strong>
+          <p>처음 검색된 후보 중 질문에 정말 답이 되는 문서를 위로 올립니다.</p>
+          <p>문서가 많아질수록 RAG 정확도를 좌우하는 핵심 장치입니다.</p>
+        </div>
+        <div class="code">아래 context의 근거만 사용하세요.
+근거가 부족하면 "확인 불가"라고 답하세요.
+답변 끝에 사용한 docId를 표시하세요.
+
+<context>
+[doc-17] ...
+[doc-22] ...
+</context></div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">RAG 예시</p>
+      <h2>질문: 휴학생도 계절학기를<br>신청할 수 있나요?</h2>
+      <div class="grid-2">
+        <div class="code">[doc-17] 계절학기 수강 신청 안내
+재학생 및 휴학생 중 복학 예정자는
+계절학기 수강 신청이 가능하다.
+
+[doc-22] 휴학/복학 규정
+휴학생은 정규학기 수강 신청 대상이 아니다.</div>
+        <div class="panel">
+          <strong>좋은 답변</strong>
+          <p>가능할 수 있습니다. 다만 "휴학생 전체"가 아니라 "복학 예정자"라는 조건이 있습니다.</p>
+          <p>좋은 RAG 답변은 결론, 조건, 출처를 함께 보존합니다. [doc-17]</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">RAG의 장점과 주의점</p>
+      <h2>RAG는 강력하지만<br>마법 버튼은 아닙니다</h2>
+      <div class="compare">
+        <div class="panel good">
+          <strong>장점</strong>
+          <ul>
+            <li>최신 문서와 내부 문서를 연결할 수 있습니다.</li>
+            <li>모델 재학습 없이 지식을 업데이트할 수 있습니다.</li>
+            <li>답변의 출처를 사용자와 운영자가 확인할 수 있습니다.</li>
+          </ul>
+        </div>
+        <div class="panel bad">
+          <strong>주의점</strong>
+          <ul>
+            <li>청킹이 나쁘면 핵심 조건이 잘립니다.</li>
+            <li>오래된 문서가 섞이면 답변이 흔들립니다.</li>
+            <li>검색 품질과 답변 품질을 따로 평가해야 합니다.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide chapter" data-part="Part 3 · LLMOps">
+      <p class="eyebrow">PART 3</p>
+      <h2>LLMOps</h2>
+      <p class="lead">LLMOps는 LLM 기반 서비스를 배포한 뒤에도 품질, 비용, 안전성을 계속 관리하는 운영 방식입니다.</p>
+      <div class="chapter-list">
+        <p>DevOps가 "만든 서비스를 잘 굴러가게 하는 일"이라면, LLMOps는 그 대상을 AI 기능으로 확장한 것입니다.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 3 · LLMOps">
+      <p class="eyebrow">Ops와 LLM 기반 서비스</p>
+      <h2>단순 챗봇만<br>LLM 서비스가 아닙니다</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>Ops</strong>
+          <p>배포, 모니터링, 장애 대응, 비용 관리, 롤백처럼 "잘 굴러가게 하는 일"입니다.</p>
+        </div>
+        <div class="panel">
+          <strong>LLM 서비스</strong>
+          <p>챗봇, 사내 문서 검색, 코드/문서 Copilot, 데이터 분석 보조를 포함합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>Agent Workflow</strong>
+          <p>검색, 도구 호출, 예약, 승인 요청처럼 여러 단계를 수행하는 AI 흐름도 포함됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 3 · LLMOps">
+      <p class="eyebrow">왜 LLMOps가 필요할까요?</p>
+      <h2>LLM 서비스는 200 OK여도<br>틀린 답변일 수 있습니다</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>일반 API</strong>
+          <p>응답 성공, 상태 코드, latency만 봐도 많은 문제를 발견할 수 있습니다.</p>
+        </div>
+        <div class="panel">
+          <strong>LLM API</strong>
+          <p>호출은 성공했지만 답변이 틀리거나, 출처가 엉뚱하거나, JSON 형식이 깨질 수 있습니다.</p>
+        </div>
+        <div class="panel">
+          <strong>복합 버전</strong>
+          <p>모델, 프롬프트, 스키마, 검색 인덱스가 함께 바뀌므로 추적이 필요합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 3 · LLMOps">
+      <p class="eyebrow">로그와 운영 지표</p>
+      <h2>나중에 원인을 찾을 수 있게<br>버전과 품질을 함께 봅니다</h2>
+      <div class="grid-2">
+        <div class="code">{
+  "model": "model-name",
+  "promptVersion": "rag-qa-v3",
+  "schemaVersion": "answer-v2",
+  "retrievedDocIds": ["doc-17", "doc-22"],
+  "latencyMs": 1840,
+  "inputTokens": 1220
+}</div>
+        <div class="panel">
+          <strong>운영 지표</strong>
+          <ul>
+            <li>Quality: 정답률, 사용자 피드백</li>
+            <li>Grounding: 근거 문서에 충실한가</li>
+            <li>Cost/Latency: 비용과 응답 속도</li>
+            <li>Safety: 개인정보, 정책 위반, prompt injection</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 3 · LLMOps">
+      <p class="eyebrow">LLMOps Loop</p>
+      <h2>로그를 남기고, 평가하고,<br>조금씩 배포합니다</h2>
+      <div class="flow" aria-label="LLMOps loop">
+        <div class="flow-item">Trace</div>
+        <div class="flow-item">Evaluate</div>
+        <div class="flow-item">Compare</div>
+        <div class="flow-item">Canary</div>
+        <div class="flow-item">Monitor</div>
+        <div class="flow-item">Rollback</div>
+        <div class="flow-item">Improve</div>
+      </div>
+      <p class="lead">프롬프트 한 줄 변경도 사용자 입장에서는 제품 동작 변경입니다.</p>
+    </section>
+
+    <section class="slide" data-part="Part 3 · LLMOps">
+      <p class="eyebrow">LLMOps Loop 단계</p>
+      <h2>각 단계에서는<br>무엇을 할까요?</h2>
+      <div class="metric-grid">
+        <div class="metric"><b>Trace</b><span>요청, 응답, 검색 문서, 모델과 프롬프트 버전을 기록합니다.</span></div>
+        <div class="metric"><b>Evaluate</b><span>정답성, 근거성, 스키마, 안전성을 평가합니다.</span></div>
+        <div class="metric"><b>Compare</b><span>새 버전이 기존 버전보다 나아졌는지 비교합니다.</span></div>
+        <div class="metric"><b>Canary</b><span>전체 배포 전 일부 사용자나 트래픽에 먼저 적용합니다.</span></div>
+        <div class="metric"><b>Monitor</b><span>품질, 비용, 지연시간, 사용자 피드백을 관찰합니다.</span></div>
+        <div class="metric"><b>Rollback</b><span>지표가 나빠지면 이전 버전으로 되돌립니다.</span></div>
+        <div class="metric"><b>Improve</b><span>실패 사례를 평가셋과 프롬프트 개선에 반영합니다.</span></div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 3 · LLMOps">
+      <p class="eyebrow">Evals</p>
+      <h2>자동 평가는<br>LLM 서비스의 테스트 코드입니다</h2>
+      <div class="grid-2">
+        <div class="panel">
+          <strong>평가 케이스</strong>
+          <p>정답이 있는 질문뿐 아니라, 문서에 없는 질문과 오래된 문서가 섞인 질문도 포함합니다.</p>
+        </div>
+        <div class="panel">
+          <strong>통과 기준</strong>
+          <p>정답, 출처, 불확실성, 스키마, 비용, 지연시간을 함께 확인합니다.</p>
+          <p>모를 때 모른다고 말하는지도 평가해야 합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Wrap-up">
+      <p class="eyebrow">정리</p>
+      <h2>신뢰할 수 있는 AI 서비스는<br>세 가지가 함께 움직입니다</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <strong>Prompting</strong>
+          <p>모델 행동을 정하는 지시 계약입니다.</p>
+        </div>
+        <div class="panel">
+          <strong>RAG</strong>
+          <p>근거 문서를 연결하는 검색 파이프라인입니다.</p>
+        </div>
+        <div class="panel">
+          <strong>LLMOps</strong>
+          <p>품질을 유지하는 평가·배포 루프입니다.</p>
+        </div>
+      </div>
+      <p class="quote">AX 엔지니어는 답변 하나가 아니라 서비스의 신뢰를 설계합니다.</p>
+    </section>
+
+    <div class="part-indicator" id="part-indicator">Intro</div>
+    <button class="fullscreen-button" id="fullscreen-button" type="button" aria-label="전체 화면 전환" title="전체 화면 (F)">
+      <svg class="icon-enter" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 3H3v5"></path>
+        <path d="M3 3l6 6"></path>
+        <path d="M16 3h5v5"></path>
+        <path d="M21 3l-6 6"></path>
+        <path d="M8 21H3v-5"></path>
+        <path d="M3 21l6-6"></path>
+        <path d="M16 21h5v-5"></path>
+        <path d="M21 21l-6-6"></path>
+      </svg>
+    </button>
+    <div class="page-counter" id="counter" aria-live="polite">1 / 25</div>
+    <div class="footer">
+      <span>AI Literacy / RAG / LLMOps</span>
+    </div>
+    <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+  </main>
+
+  <script>
+    const deck = document.querySelector(".deck");
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const counter = document.getElementById("counter");
+    const progressBar = document.getElementById("progress-bar");
+    const partIndicator = document.getElementById("part-indicator");
+    const fullscreenButton = document.getElementById("fullscreen-button");
+    let index = 0;
+
+    function showSlide(nextIndex) {
+      const boundedIndex = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      deck.dataset.direction = boundedIndex < index ? "prev" : "next";
+      index = boundedIndex;
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("active", slideIndex === index);
+      });
+      counter.textContent = `${index + 1} / ${slides.length}`;
+      partIndicator.textContent = slides[index].dataset.part || "";
+      progressBar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      window.location.hash = `slide-${index + 1}`;
+    }
+
+    function readHash() {
+      const match = window.location.hash.match(/slide-(\d+)/);
+      if (!match) return 0;
+      return Number(match[1]) - 1;
+    }
+
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    }
+
+    function updateFullscreenButton() {
+      const isFullscreen = Boolean(document.fullscreenElement);
+      fullscreenButton.setAttribute("aria-label", isFullscreen ? "전체 화면 종료" : "전체 화면 전환");
+      fullscreenButton.setAttribute("title", isFullscreen ? "전체 화면 종료 (F)" : "전체 화면 (F)");
+      fullscreenButton.innerHTML = isFullscreen
+        ? `<svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 3v6H3"></path>
+            <path d="M3 9l6-6"></path>
+            <path d="M15 3v6h6"></path>
+            <path d="M21 9l-6-6"></path>
+            <path d="M9 21v-6H3"></path>
+            <path d="M3 15l6 6"></path>
+            <path d="M15 21v-6h6"></path>
+            <path d="M21 15l-6 6"></path>
+          </svg>`
+        : `<svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 3H3v5"></path>
+            <path d="M3 3l6 6"></path>
+            <path d="M16 3h5v5"></path>
+            <path d="M21 3l-6 6"></path>
+            <path d="M8 21H3v-5"></path>
+            <path d="M3 21l6-6"></path>
+            <path d="M16 21h5v-5"></path>
+            <path d="M21 21l-6-6"></path>
+          </svg>`;
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        showSlide(index + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        showSlide(index - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        showSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        showSlide(slides.length - 1);
+      }
+      if (event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        toggleFullscreen().catch(() => {});
+      }
+    });
+
+    fullscreenButton.addEventListener("click", () => {
+      toggleFullscreen().catch(() => {});
+    });
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
+    window.addEventListener("hashchange", () => showSlide(readHash()));
+    updateFullscreenButton();
+    showSlide(readHash());
+  </script>
+</body>
+</html>
