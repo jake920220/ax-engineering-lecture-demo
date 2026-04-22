@@ -947,17 +947,6 @@
     </section>
 
     <section class="slide" data-part="Part 2 · RAG">
-      <p class="eyebrow">검색 품질을 높이는 핵심 요소</p>
-      <h2>좋은 RAG는<br>좋은 검색에서 시작합니다</h2>
-      <div class="metric-grid">
-        <div class="metric"><b>Chunking</b><span>답에 필요한 조건이 같은 조각 안에 들어와야 합니다. 너무 작으면 맥락이 끊기고, 너무 크면 잡음이 섞입니다.</span></div>
-        <div class="metric"><b>Hybrid Search</b><span>벡터 검색은 의미에 강하고, 키워드 검색은 정확한 단어에 강합니다. 둘을 함께 쓰면 놓치는 문서를 줄입니다.</span></div>
-        <div class="metric"><b>Metadata Filter</b><span>날짜, 학기, 권한, 문서 상태로 후보를 좁혀 지금 답하면 안 되는 문서를 걸러냅니다.</span></div>
-        <div class="metric"><b>Reranking</b><span>넓게 찾은 후보 중 질문에 직접 답하는 문서를 위로 올려 최종 context 품질을 높입니다.</span></div>
-      </div>
-    </section>
-
-    <section class="slide" data-part="Part 2 · RAG">
       <p class="eyebrow">리랭킹과 프롬프트 반영</p>
       <h2>찾은 문서를 다시 줄 세우고<br>답변 정책과 함께 넣습니다</h2>
       <div class="grid-2">
@@ -995,6 +984,17 @@
           <strong>좋은 답변</strong>
           <p>가능할 수 있습니다. 다만 "휴학생 전체"가 아니라 "복학 예정자"라는 조건이 있습니다. 출처 [doc-17]</p>
         </div>
+      </div>
+    </section>
+
+    <section class="slide" data-part="Part 2 · RAG">
+      <p class="eyebrow">검색 품질을 높이는 핵심 요소</p>
+      <h2>좋은 RAG는<br>좋은 검색에서 시작합니다</h2>
+      <div class="metric-grid">
+        <div class="metric"><b>Chunking</b><span>답에 필요한 조건이 같은 조각 안에 들어와야 합니다. 너무 작으면 맥락이 끊기고, 너무 크면 잡음이 섞입니다.</span></div>
+        <div class="metric"><b>Hybrid Search</b><span>벡터 검색은 의미에 강하고, 키워드 검색은 정확한 단어에 강합니다. 둘을 함께 쓰면 놓치는 문서를 줄입니다.</span></div>
+        <div class="metric"><b>Metadata Filter</b><span>날짜, 학기, 권한, 문서 상태로 후보를 좁혀 지금 답하면 안 되는 문서를 걸러냅니다.</span></div>
+        <div class="metric"><b>Reranking</b><span>넓게 찾은 후보 중 질문에 직접 답하는 문서를 위로 올려 최종 context 품질을 높입니다.</span></div>
       </div>
     </section>
 
